@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App | Beautiful Productivity App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Roboto', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'smoke': 'smoke 12s linear infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(-5px)' },
+                            '50%': { transform: 'translateY(5px)' }
+                        },
+                        smoke: {
+                            '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '0' },
+                            '10%': { opacity: '0.1' },
+                            '100%': { transform: 'translateY(-50vh) rotate(180deg)', opacity: '0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="font-sans bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 min-h-screen transition-colors duration-300 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 dark:text-gray-200 overflow-x-hidden">
+    <!-- Smoke Background Animation -->
+    <div id="smoke-container" class="fixed inset-0 w-full h-full pointer-events-none z-0"></div>
+    
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 relative z-10 max-w-4xl">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center space-x-2">
+                <button class="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded-full p-2 focus:outline-none focus:ring-2 focus:ring-primary-500" id="theme-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+                <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-amber-500">Todo App</h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="relative hidden md:block">
+                    <input type="text" id="search-input" placeholder="Search tasks..." class="pl-10 pr-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <button id="export-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Export Tasks">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="glassmorphism p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Total Tasks</p>
+                <h3 class="text-xl font-bold" id="total-tasks">0</h3>
+            </div>
+            <div class="glassmorphism p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Completed</p>
+                <h3 class="text-xl font-bold text-green-500" id="completed-tasks">0</h3>
+            </div>
+            <div class="glassmorphism p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Active</p>
+                <h3 class="text-xl font-bold text-primary-500" id="active-tasks">0</h3>
+            </div>
+            <div class="glassmorphism p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Overdue</p>
+                <h3 class="text-xl font-bold text-red-500" id="overdue-tasks">0</h3>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-6">
+            <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Task Progress</span>
+                <span class="text-sm font-medium text-primary-500" id="progress-text">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div id="progress-bar" class="bg-gradient-to-r from-primary-400 to-primary-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Main ToDo Card -->
+        <div class="glassmorphism shadow-lg rounded-xl overflow-hidden mb-6 animate-fade-in">
+            <!-- Task Input -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col md:flex-row gap-3">
+                <div class="flex-1 relative">
+                    <input type="text" id="task-input" placeholder="What needs to be done?" class="w-full pl-4 pr-12 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" autocomplete="off">
+                    <button id="add-task-btn" class="absolute right-3 top-3 text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex gap-2">
+                    <select id="priority-select" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <input type="date" id="due-date" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-600 flex flex-wrap gap-2">
+                <button data-filter="all" class="filter-btn px-3 py-1 rounded-full bg-primary-500 text-white text-sm font-medium">All</button>
+                <button data-filter="active" class="filter-btn px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Active</button>
+                <button data-filter="completed" class="filter-btn px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Completed</button>
+                <button data-filter="today" class="filter-btn px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Due Today</button>
+                <button data-filter="overdue" class="filter-btn px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-sm font-medium hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors">Overdue</button>
+            </div>
+
+            <!-- Task List -->
+            <div class="max-h-96 overflow-y-auto custom-scrollbar" id="task-list">
+                <!-- Tasks will be added here dynamically -->
+                <div class="p-4 text-center text-gray-500 dark:text-gray-400" id="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <p>Your tasks will appear here</p>
+                    <p class="text-sm">Add your first task above</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="p-4 bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
+                <button id="clear-completed" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">Clear completed</button>
+                <button id="archive-completed" class="text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Archive completed</button>
+            </div>
+        </div>
+
+        <!-- Mobile Search (hidden on larger screens) -->
+        <div class="mb-6 md:hidden">
+            <div class="relative">
+                <input type="text" id="mobile-search-input" placeholder="Search tasks..." class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Mobile FAB -->
+        <button id="fab-btn" class="fixed bottom-6 right-6 md:hidden z-20 w-12 h-12 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-lg hover:bg-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+
+        <!-- Toast Notification Container -->
+        <div id="toast-container" class="fixed bottom-4 right-4 space-y-2 z-30"></div>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500 dark:text-gray-400 text-sm">
+            <p>Built by the Reframe Development Team</p>
+            <p class="mt-1">© 2025 Todo App - All rights reserved</p>
+        </footer>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
